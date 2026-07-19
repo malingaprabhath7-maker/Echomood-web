@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echomood - හැඟුමන් දෝංකාර දෙන තැන</title>
+    
+    <link rel="stylesheet" type="text/css" href="style.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #111827 !important;
+            color: #fff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.show {
+            display: flex !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <h2>Echomood</h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Store</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <video autoplay loop muted playsinline class="back-video">
+            <source src="assets/sunset-video.mp4" type="video/mp4">
+        </video>
+
+        <div class="hero-content">
+            <h1>Echomood</h1>
+            <p>හැඟුමන් දෝංකාර දෙන තැන...</p>
+            <a href="https://www.facebook.com/share/1BYnTvPcCb/" target="_blank" class="btn">Visit Our Page <i class="fab fa-facebook"></i></a>
+            
+            <div class="social-icons">
+                <a href="https://www.facebook.com/share/1BYnTvPcCb/" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <section class="video-section">
+        <div class="section-title">
+            <h2>Recent Creations</h2>
+            <p>ඔබට අවශ්‍ය Category එක තෝරා නිර්මාණ නරඹන්න</p>
+        </div>
+
+        <div class="category-tabs">
+            <button class="tab-btn active" onclick="openCategory(event, 'sad')">Sad Mood</button>
+            <button class="tab-btn" onclick="openCategory(event, 'nature')">Natural</button>
+            <button class="tab-btn" onclick="openCategory(event, 'sunset')">Sunset</button>
+            <button class="tab-btn" onclick="openCategory(event, 'advice')">Advice</button>
+        </div>
+
+        <div class="category-video-container">
+            
+            <div id="sad" class="tab-content show">
+                <div class="video-box">
+                    <video controls>
+                        <source src="assets/sadmood.mp4" type="video/mp4">
+                    </video>
+                    <h3>Sad Mood</h3>
+                    <p>තනිකම සහ මැකුණු මතකයන් අතර අතරමං වූ මොහොතක...</p>
+                </div>
+            </div>
+
+            <div id="nature" class="tab-content">
+                <div class="video-box">
+                    <video controls>
+                        <source src="assets/natural.mp4" type="video/mp4">
+                    </video>
+                    <h3>Natural Aesthetics</h3>
+                    <p>ස්වභාවධර්මයේ නිහඬ සුන්දරත්වය සහ සන්සුන් බව.</p>
+                </div>
+            </div>
+
+            <div id="sunset" class="tab-content">
+                <div class="video-box">
+                    <video controls>
+                        <source src="assets/sunset.mp4" type="video/mp4">
+                    </video>
+                    <h3>Sunset Vibe</h3>
+                    <p>හැන්දෑ යාමයේ රන්වන් පැහැයෙන් හැඩවුණු අහස.</p>
+                </div>
+            </div>
+
+            <div id="advice" class="tab-content">
+                <div class="video-box">
+                    <video controls>
+                        <source src="assets/advice.mp4" type="video/mp4">
+                    </video>
+                    <h3>Life Advice</h3>
+                    <p>ජීවිතයට ශක්තියක් සහ අලුත් බලාපොරොත්තුවක් දෙන වදන්.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="posts-section">
+        <div class="section-title">
+            <h2>Daily Reflections</h2>
+            <p>හදවතට දැනෙන වදන් සහ සිතුවිලි සමුච්චය</p>
+        </div>
+
+        <div class="posts-container">
+            <div class="post-card-box">
+                <img src="assets/post1.jpg" alt="Echomood Post 1">
+                <div class="post-info">
+                    <span>Sad Mood</span>
+                    <p>සමහර මතකයන් අමතක කරන්න හැදුවත්, ඒවා හදවතේ තදින්ම ලියවිලා තියෙනවා.</p>
+                </div>
+            </div>
+
+            <div class="post-card-box">
+                <img src="assets/post2.jpg" alt="Echomood Post 2">
+                <div class="post-info">
+                    <span>Advice</span>
+                    <p>වැටෙන හැම පාරකම අලුත් පාඩමක් ඉගෙන ගන්න. ජීවිතය පටන් ගන්නේ එතනින්.</p>
+                </div>
+            </div>
+
+            <div class="post-card-box">
+                <img src="assets/post3.jpg" alt="Echomood Post 3">
+                <div class="post-info">
+                    <span>Sunset Vibe</span>
+                    <p>හැම අඳුරු රාත්‍රියකටම පස්සේ ලස්සන දවසක් උදාවෙනවාමයි.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="store-section">
+        <div class="store-title">
+            <h2>Echomood Store</h2>
+            <p>ඔබේ හදවතට දැනෙන Premium නිර්මාණ ළඟදීම...</p>
+        </div>
+
+        <div class="product-container">
+            <div class="product-card">
+                <div class="badge">Coming Soon</div>
+                <div class="product-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>Premium Wallpapers</h3>
+                <p>Aesthetic සහ Minimalist ජංගම දුරකථන පසුබිම් පින්තූර.</p>
+            </div>
+
+            <div class="product-card">
+                <div class="badge">Coming Soon</div>
+                <div class="product-icon"><i class="fas fa-palette"></i></div>
+                <h3>Artistic Prints</h3>
+                <p>හැඟීම් දෝංකාර දෙන උසස් තත්ත්වයේ Wall Arts නිර්මාණ.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function openCategory(evt, categoryName) {
+            var tabcontent = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("show");
+            }
+
+            var tablinks = document.getElementsByClassName("tab-btn");
+            for (var i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+
+            document.getElementById(categoryName).classList.add("show");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+
+</body>
+</html>
