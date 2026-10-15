@@ -10,6 +10,9 @@ const backgrounds = [
   { id: 'rain', label: 'Rain', css: 'linear-gradient(170deg,#4b5878,#1d2333 60%,#0c0f18)' },
   ...reels.map((r) => ({ id: r.file, label: r[lang][0], css: `url(${url(`media/${r.file}.jpg`)}) center/cover` })),
 ];
+// options are built as a string: the Astro compiler mis-parses expressions inside <select>
+const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const options = quotes.map((q) => `<option value="${q.id}" data-si="${esc(q.si)}" data-en="${esc(q.en)}">${moods[q.mood].emoji} ${esc(q.si)}</option>`).join('');
 ---
 <section class="mx-auto max-w-6xl px-5 pt-28">
   <h1 class="text-4xl font-semibold sm:text-5xl"><span class="glow-text">{u.wallTitle}</span></h1>
@@ -19,9 +22,7 @@ const backgrounds = [
     <form id="wall" class="card space-y-6 p-6" onsubmit="return false">
       <div>
         <label class="label" for="w-quote">{u.pickQuote}</label>
-        <select id="w-quote" class="field">
-          {quotes.map((q) => <option value={q.id} data-si={q.si} data-en={q.en}>{moods[q.mood].emoji} {q.si}</option>)}
-        </select>
+        <select id="w-quote" class="field" set:html={options}></select>
       </div>
       <div>
         <label class="label" for="w-own">{u.ownText}</label>
