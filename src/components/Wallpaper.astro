@@ -1,0 +1,146 @@
+---
+import { t, url, reels, quotes, moods, type Lang } from '../data/content';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const u = t(lang);
+const backgrounds = [
+  { id: 'neon', label: 'Neon night', css: 'linear-gradient(160deg,#2b0f5c,#0b0a1f 55%,#071f3a)' },
+  { id: 'dusk', label: 'Dusk', css: 'linear-gradient(170deg,#ff7a59,#c04dff 55%,#1a1040)' },
+  { id: 'forest', label: 'Forest', css: 'linear-gradient(170deg,#1f6b4a,#0d2b25 60%,#07140f)' },
+  { id: 'rain', label: 'Rain', css: 'linear-gradient(170deg,#4b5878,#1d2333 60%,#0c0f18)' },
+  ...reels.map((r) => ({ id: r.file, label: r[lang][0], css: `url(${url(`media/${r.file}.jpg`)}) center/cover` })),
+];
+---
+<section class="mx-auto max-w-6xl px-5 pt-28">
+  <h1 class="text-4xl font-semibold sm:text-5xl"><span class="glow-text">{u.wallTitle}</span></h1>
+  <p class="mt-3 max-w-2xl text-lg text-muted">{u.wallIntro}</p>
+
+  <div class="mt-10 grid gap-10 lg:grid-cols-[1fr_minmax(0,22rem)]">
+    <form id="wall" class="card space-y-6 p-6" onsubmit="return false">
+      <div>
+        <label class="label" for="w-quote">{u.pickQuote}</label>
+        <select id="w-quote" class="field">
+          {quotes.map((q) => <option value={q.id} data-si={q.si} data-en={q.en}>{moods[q.mood].emoji} {q.si}</option>)}
+        </select>
+      </div>
+      <div>
+        <label class="label" for="w-own">{u.ownText}</label>
+        <textarea id="w-own" rows="3" maxlength="160" class="field" placeholder={u.ownPh}></textarea>
+      </div>
+      <fieldset>
+        <legend class="label">{u.background}</legend>
+        <div class="grid grid-cols-5 gap-2 sm:grid-cols-9">
+          {backgrounds.map((b, i) => (
+            <label class="cursor-pointer" title={b.label}>
+              <input type="radio" name="bg" value={b.id} checked={i === 0} class="peer sr-only" />
+              <span class="block aspect-[9/16] rounded-xl border-2 border-transparent peer-checked:border-cyan peer-focus-visible:outline-2 peer-focus-visible:outline-cyan" style={`background:${b.css}`}><span class="sr-only">{b.label}</span></span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <div class="grid gap-6 sm:grid-cols-2">
+        <fieldset>
+          <legend class="label">{u.format}</legend>
+          <div class="flex flex-wrap gap-2">
+            <label><input type="radio" name="fmt" value="phone" checked class="peer sr-only" /><span class="chip inline-block peer-checked:border-neon peer-checked:bg-neon">{u.phone}</span></label>
+            <label><input type="radio" name="fmt" value="square" class="peer sr-only" /><span class="chip inline-block peer-checked:border-neon peer-checked:bg-neon">{u.square}</span></label>
+          </div>
+        </fieldset>
+        <div>
+          <label class="label" for="w-size">{u.textSize}</label>
+          <input id="w-size" type="range" min="44" max="96" value="64" class="w-full" />
+        </div>
+      </div>
+      <label class="flex items-center gap-3"><input id="w-en" type="checkbox" checked={lang === 'en'} class="size-5" />{u.showEn}</label>
+      <button type="button" id="w-download" class="btn btn-neon w-full sm:w-auto">⬇ {u.download}</button>
+    </form>
+
+    <div class="lg:sticky lg:top-6 lg:self-start">
+      <p class="label">{u.preview}</p>
+      <canvas id="w-canvas" width="1080" height="1920" class="mx-auto w-full max-w-[22rem] rounded-3xl border border-line shadow-[0_30px_80px_-30px_var(--color-neon)]" role="img" aria-label={u.preview}></canvas>
+    </div>
+  </div>
+</section>
+
+<script>
+  const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+  const form = document.getElementById('wall') as HTMLFormElement;
+  const canvas = document.getElementById('w-canvas') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+  const sel = document.getElementById('w-quote') as HTMLSelectElement;
+  const own = document.getElementById('w-own') as HTMLTextAreaElement;
+  const size = document.getElementById('w-size') as HTMLInputElement;
+  const showEn = document.getElementById('w-en') as HTMLInputElement;
+  const gradients: Record<string, string[]> = {
+    neon: ['#2b0f5c', '#0b0a1f', '#071f3a'], dusk: ['#ff7a59', '#c04dff', '#1a1040'],
+    forest: ['#1f6b4a', '#0d2b25', '#07140f'], rain: ['#4b5878', '#1d2333', '#0c0f18'],
+  };
+  const images: Record<string, HTMLImageElement> = {};
+  const loadImg = (id: string) => new Promise<HTMLImageElement>((res) => {
+    if (images[id]?.complete) return res(images[id]);
+    const im = new Image(); im.onload = () => res(im); im.src = `${base}media/${id}.jpg`; images[id] = im;
+  });
+
+  const q = new URLSearchParams(location.search).get('q');
+  if (q && [...sel.options].some((o) => o.value === q)) sel.value = q;
+
+  function wrap(text: string, max: number) {
+    const words = text.split(/\s+/); const lines: string[] = []; let line = '';
+    for (const w of words) { const test = line ? `${line} ${w}` : w; if (ctx.measureText(test).width > max && line) { lines.push(line); line = w; } else line = test; }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  async function draw() {
+    const f = new FormData(form);
+    const W = 1080; const H = f.get('fmt') === 'square' ? 1080 : 1920;
+    canvas.width = W; canvas.height = H;
+    const bg = String(f.get('bg'));
+    if (gradients[bg]) {
+      const g = ctx.createLinearGradient(0, 0, W * 0.4, H); gradients[bg].forEach((c, i, a) => g.addColorStop(i / (a.length - 1), c));
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      const glow = ctx.createRadialGradient(W * 0.8, H * 0.15, 0, W * 0.8, H * 0.15, W * 0.7); glow.addColorStop(0, '#c04dff55'); glow.addColorStop(1, '#c04dff00');
+      ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+    } else {
+      const im = await loadImg(bg);
+      const s = Math.max(W / im.width, H / im.height); const w = im.width * s; const h = im.height * s;
+      ctx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
+      ctx.fillStyle = 'rgba(8,7,25,.45)'; ctx.fillRect(0, 0, W, H);
+    }
+    const opt = sel.selectedOptions[0];
+    const custom = own.value.trim();
+    const main = custom || opt.dataset.si!;
+    const en = !custom && showEn.checked ? opt.dataset.en! : '';
+    const fs = Number(size.value) * (H === 1080 ? 0.85 : 1);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 18;
+    ctx.font = `600 ${fs}px "Noto Sans Sinhala", "Outfit", sans-serif`;
+    const lines = wrap(main, W - 200); const lh = fs * 1.55;
+    ctx.font = `300 ${fs * 0.5}px "Outfit", sans-serif`;
+    const enLines = en ? wrap(en, W - 260) : []; const elh = fs * 0.75;
+    const total = lines.length * lh + (enLines.length ? 50 + enLines.length * elh : 0);
+    let y = (H - total) / 2 + lh * 0.7;
+    ctx.font = `600 ${fs}px "Noto Sans Sinhala", "Outfit", sans-serif`;
+    lines.forEach((l) => { ctx.fillText(l, W / 2, y); y += lh; });
+    if (enLines.length) { y += 30; ctx.font = `300 ${fs * 0.5}px "Outfit", sans-serif`; ctx.fillStyle = '#e5e1ffcc'; enLines.forEach((l) => { ctx.fillText(l, W / 2, y); y += elh; }); }
+    // signature: a small heartbeat line and the name
+    ctx.shadowBlur = 0;
+    const sy = H - (H === 1080 ? 90 : 170);
+    const line = ctx.createLinearGradient(W / 2 - 160, 0, W / 2 + 160, 0); line.addColorStop(0, '#38e1ff00'); line.addColorStop(0.5, '#38e1ff'); line.addColorStop(1, '#ff4fd800');
+    ctx.strokeStyle = line; ctx.lineWidth = 4; ctx.beginPath();
+    ctx.moveTo(W / 2 - 160, sy - 50); ctx.lineTo(W / 2 - 40, sy - 50); ctx.lineTo(W / 2 - 20, sy - 80); ctx.lineTo(W / 2 + 5, sy - 20); ctx.lineTo(W / 2 + 25, sy - 50); ctx.lineTo(W / 2 + 160, sy - 50); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = `600 34px "Outfit", sans-serif`; ctx.fillText('E C H O M O O D', W / 2, sy + 10);
+    ctx.fillStyle = '#ffffffaa'; ctx.font = `300 24px "Outfit", sans-serif`; ctx.fillText('Sound & Feeling', W / 2, sy + 48);
+  }
+
+  form.addEventListener('input', draw);
+  form.addEventListener('change', draw);
+  document.getElementById('w-download')!.addEventListener('click', () => {
+    canvas.toBlob((b) => {
+      if (!b) return;
+      const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `echomood-${sel.value}.png`; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }, 'image/png');
+  });
+  Promise.all([document.fonts.load('600 60px "Noto Sans Sinhala"', 'අ'), document.fonts.load('300 30px "Outfit"')]).catch(() => {}).finally(draw);
+  draw();
+</script>

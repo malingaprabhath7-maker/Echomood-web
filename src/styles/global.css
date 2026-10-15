@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", "Noto Sans Sinhala", system-ui, sans-serif;
+  --color-night: #0b0a1f;
+  --color-deep: #141233;
+  --color-card: #1b1840;
+  --color-line: #2e2a63;
+  --color-ink: #f1efff;
+  --color-muted: #a9a4d6;
+  --color-neon: #c04dff;
+  --color-cyan: #38e1ff;
+  --color-pink: #ff4fd8;
+}
+html { scroll-behavior: smooth; color-scheme: dark; }
+body { background: var(--color-night); color: var(--color-ink); }
+:focus-visible { outline: 2px solid var(--color-cyan); outline-offset: 3px; border-radius: 10px; }
+.glow-text { background: linear-gradient(90deg, var(--color-cyan), var(--color-neon) 55%, var(--color-pink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; border-radius: 999px; padding: .75rem 1.4rem; font-weight: 500; transition: transform .15s, box-shadow .15s, background-color .15s, border-color .15s; }
+.btn:hover { transform: translateY(-1px); }
+.btn-neon { background: linear-gradient(90deg, var(--color-neon), var(--color-pink)); color: #fff; box-shadow: 0 10px 30px -10px var(--color-neon); }
+.btn-neon:hover { box-shadow: 0 14px 40px -8px var(--color-pink); }
+.btn-ghost { border: 1px solid var(--color-line); background: color-mix(in oklab, var(--color-deep) 70%, transparent); backdrop-filter: blur(8px); }
+.btn-ghost:hover { border-color: var(--color-cyan); }
+.card { background: var(--color-card); border: 1px solid var(--color-line); border-radius: 1.5rem; }
+.chip { border: 1px solid var(--color-line); border-radius: 999px; padding: .5rem 1rem; transition: background-color .15s, border-color .15s; }
+.chip[aria-pressed="true"] { background: var(--color-neon); border-color: var(--color-neon); color: #fff; }
+.field { width: 100%; border: 1px solid var(--color-line); background: var(--color-deep); border-radius: .9rem; padding: .65rem .85rem; }
+.label { display: block; margin-bottom: .45rem; font-size: .9rem; font-weight: 500; color: var(--color-muted); }
+input[type="range"], input[type="checkbox"] { accent-color: var(--color-neon); }
+/* a soft pulse line, echoing the heartbeat in the logo */
+.pulse-line { height: 2px; background: linear-gradient(90deg, transparent, var(--color-cyan), var(--color-neon), transparent); }
+.fade-up { animation: fade-up .5s ease both; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .fade-up { animation: none; } .btn:hover { transform: none; } }

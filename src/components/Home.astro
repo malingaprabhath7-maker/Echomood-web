@@ -1,0 +1,231 @@
+---
+import { t, url, page, reels, quotes, moods, FACEBOOK, type Lang, type Mood } from '../data/content';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const u = t(lang);
+const reelMoods = ['sad', 'nature', 'sunset'] as Mood[];
+const data = { reels: reels.map((r) => ({ id: r.id, file: r.file, mood: r.mood, title: r[lang][0], line: r[lang][1] })), quotes, moods };
+---
+<!-- hero with the looping sunset video -->
+<section class="relative isolate grid min-h-[92svh] place-items-center overflow-hidden px-5 pt-20 text-center">
+  <video class="absolute inset-0 -z-20 size-full object-cover" autoplay muted loop playsinline preload="auto" poster={url('media/hero.jpg')} aria-hidden="true">
+    <source src={url('media/hero.mp4')} type="video/mp4" />
+  </video>
+  <div class="absolute inset-0 -z-10 bg-gradient-to-b from-night/70 via-night/40 to-night"></div>
+  <div class="fade-up max-w-3xl">
+    <img src={url('img/logo.webp')} alt="Echomood — Sound & Feeling" width="160" height="160" class="mx-auto size-32 rounded-full shadow-[0_0_60px_-10px_var(--color-neon)] sm:size-40" />
+    <h1 class="mt-6 text-5xl font-bold tracking-tight sm:text-7xl"><span class="glow-text">Echomood</span></h1>
+    <p class="mt-3 text-xl font-medium sm:text-2xl">{u.tagline}</p>
+    <p class="mt-1 text-muted">{u.taglineSi}</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="#reels" class="btn btn-neon">▶ {u.watch}</a>
+      <a href={FACEBOOK} target="_blank" rel="noopener" class="btn btn-ghost">{u.follow}</a>
+    </div>
+  </div>
+</section>
+
+<!-- mood picker -->
+<section class="mx-auto max-w-6xl px-5" id="feel">
+  <div class="card relative overflow-hidden p-6 sm:p-10">
+    <div class="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-neon/25 blur-3xl"></div>
+    <h2 class="text-3xl font-semibold">{u.feelTitle}</h2>
+    <p class="mt-2 text-muted">{u.feelIntro}</p>
+    <div class="mt-6 flex flex-wrap gap-2" role="group" aria-label={u.feelTitle}>
+      {(Object.keys(moods) as Mood[]).map((m) => <button type="button" class="chip text-lg" data-feel={m} aria-pressed="false">{moods[m].emoji} {moods[m][lang]}</button>)}
+    </div>
+    <div id="feel-out" hidden class="fade-up mt-8 grid items-center gap-6 sm:grid-cols-[1fr_auto]">
+      <div>
+        <p class="text-sm uppercase tracking-widest text-cyan">{u.forYou}</p>
+        <blockquote class="mt-3 text-2xl font-medium leading-relaxed" id="feel-quote" lang="si"></blockquote>
+        {lang === 'en' && <p class="mt-2 text-muted" id="feel-en"></p>}
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <button type="button" class="btn btn-neon" id="feel-watch">▶ {u.watchThis}</button>
+        <button type="button" class="btn btn-ghost" id="feel-again">↻ {u.another}</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- reels -->
+<section class="mx-auto mt-24 max-w-6xl scroll-mt-20 px-5" id="reels">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div><h2 class="text-4xl font-semibold">{u.reelsTitle}</h2><p class="mt-2 text-muted">{u.reelsIntro}</p></div>
+    <div class="flex flex-wrap gap-2" role="group" aria-label={u.reelsTitle}>
+      <button type="button" class="chip" data-filter="all" aria-pressed="true">{u.all}</button>
+      {reelMoods.map((m) => <button type="button" class="chip" data-filter={m} aria-pressed="false">{moods[m].emoji} {moods[m][lang]}</button>)}
+    </div>
+  </div>
+  <ul class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+    {reels.map((r, i) => (
+      <li data-mood={r.mood} class="fade-up" style={`animation-delay:${i * 60}ms`}>
+        <button type="button" data-open={r.id} class="group relative block aspect-[9/16] w-full overflow-hidden rounded-2xl border border-line text-left">
+          <video class="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105" muted loop playsinline preload="none" poster={url(`media/${r.file}.jpg`)} data-preview>
+            <source src={url(`media/${r.file}.mp4`)} type="video/mp4" />
+          </video>
+          <span class="absolute inset-0 bg-gradient-to-t from-night via-night/10 to-transparent"></span>
+          <span class="absolute right-3 top-3 rounded-full bg-night/70 px-2 py-0.5 text-xs">{r.length}</span>
+          <span class="absolute inset-0 m-auto grid size-14 place-items-center rounded-full bg-white/15 text-2xl backdrop-blur transition-opacity group-hover:opacity-0" aria-hidden="true">▶</span>
+          <span class="absolute inset-x-3 bottom-3">
+            <span class="text-xs" style={`color:${moods[r.mood].color}`}>{moods[r.mood].emoji} {moods[r.mood][lang]}</span>
+            <span class="mt-0.5 block font-semibold leading-snug">{r[lang][0]}</span>
+            <span class="sr-only">{u.play}</span>
+          </span>
+        </button>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<!-- reel player -->
+<dialog id="player" class="m-0 size-full max-h-none max-w-none bg-night/95 p-0 text-ink backdrop:bg-black/80" aria-label="Reel">
+  <div class="mx-auto flex h-full max-w-5xl items-center justify-center gap-3 px-3 py-14 sm:gap-6">
+    <button type="button" class="btn btn-ghost hidden size-12 p-0 sm:inline-flex" data-step="-1" aria-label={u.prev}>‹</button>
+    <figure class="flex h-full max-h-[52rem] flex-col">
+      <video id="player-video" class="aspect-[9/16] h-full min-h-0 rounded-2xl bg-black object-contain" controls playsinline></video>
+      <figcaption class="mt-3 flex items-start justify-between gap-4">
+        <span><span id="player-title" class="block text-lg font-semibold"></span><span id="player-line" class="block text-sm text-muted"></span></span>
+        <button type="button" class="btn btn-ghost shrink-0 px-4 py-2 text-sm" id="player-share">{u.share}</button>
+      </figcaption>
+    </figure>
+    <button type="button" class="btn btn-ghost hidden size-12 p-0 sm:inline-flex" data-step="1" aria-label={u.next}>›</button>
+  </div>
+  <button type="button" class="btn btn-ghost absolute right-4 top-4 size-11 p-0 text-xl" id="player-close" aria-label={u.close}>✕</button>
+  <div class="absolute inset-x-0 bottom-4 flex justify-center gap-3 sm:hidden">
+    <button type="button" class="btn btn-ghost px-5 py-2" data-step="-1" aria-label={u.prev}>‹</button>
+    <button type="button" class="btn btn-ghost px-5 py-2" data-step="1" aria-label={u.next}>›</button>
+  </div>
+  <p id="player-toast" class="absolute left-1/2 top-5 -translate-x-1/2 rounded-full bg-neon px-4 py-1.5 text-sm" hidden>{u.copied}</p>
+</dialog>
+
+<!-- reflections -->
+<section class="mx-auto mt-24 max-w-6xl scroll-mt-20 px-5" id="reflections">
+  <h2 class="text-4xl font-semibold">{u.reflTitle}</h2>
+  <p class="mt-2 text-muted">{u.reflIntro}</p>
+  <ul class="mt-8 columns-1 gap-4 sm:columns-2 lg:columns-3">
+    {quotes.map((q) => (
+      <li class="card mb-4 break-inside-avoid p-6" style={`border-top:3px solid ${moods[q.mood].color}`}>
+        <p class="text-xs" style={`color:${moods[q.mood].color}`}>{moods[q.mood].emoji} {moods[q.mood][lang]}</p>
+        <blockquote class="mt-3 text-xl font-medium leading-relaxed" lang="si">{q.si}</blockquote>
+        {lang === 'en' && <p class="mt-2 text-muted">{q.en}</p>}
+        <div class="mt-5 flex flex-wrap gap-2 text-sm">
+          <a class="btn btn-ghost px-3.5 py-1.5" href={page(lang, `wallpaper/?q=${q.id}`)}>🖼 {u.makeWall}</a>
+          <button type="button" class="btn btn-ghost px-3.5 py-1.5" data-copy={q.si} data-done={u.copied}>{u.copy}</button>
+        </div>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<!-- store -->
+<section class="mx-auto mt-24 max-w-6xl px-5">
+  <div class="text-center"><h2 class="text-4xl font-semibold">{u.storeTitle}</h2><p class="mt-2 text-muted">{u.storeIntro}</p></div>
+  <div class="mt-8 grid gap-4 sm:grid-cols-2">
+    {u.products.map(([name, text], i) => (
+      <div class="card relative p-7">
+        <span class="absolute right-5 top-5 rounded-full border border-pink/60 px-3 py-1 text-xs text-pink">{u.soon}</span>
+        <p class="text-4xl" aria-hidden="true">{i ? '🎨' : '📱'}</p>
+        <h3 class="mt-4 text-xl font-semibold">{name}</h3>
+        <p class="mt-1 text-muted">{text}</p>
+      </div>
+    ))}
+  </div>
+  <p class="mt-6 text-center"><a href={FACEBOOK} target="_blank" rel="noopener" class="text-cyan underline underline-offset-4">{u.notify} →</a></p>
+</section>
+
+<!-- about -->
+<section class="mx-auto mt-24 grid max-w-6xl scroll-mt-20 items-center gap-10 px-5 md:grid-cols-2" id="about">
+  <img src={url('img/studio.webp')} alt="Echomood neon logo in a studio with headphones" class="w-full rounded-3xl border border-line" loading="lazy" />
+  <div>
+    <h2 class="text-4xl font-semibold">{u.aboutTitle}</h2>
+    <p class="mt-4 text-lg leading-relaxed text-muted">{u.about}</p>
+    <a href={FACEBOOK} target="_blank" rel="noopener" class="btn btn-neon mt-6">{u.follow}</a>
+  </div>
+</section>
+
+<script is:inline type="application/json" id="em-data" set:html={JSON.stringify(data)}></script>
+<script>
+  type R = { id: string; file: string; mood: string; title: string; line: string };
+  type Q = { id: string; mood: string; si: string; en: string };
+  const data = JSON.parse(document.getElementById('em-data')!.textContent!) as { reels: R[]; quotes: Q[] };
+  const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+  const src = (r: R) => `${base}media/${r.file}.mp4`;
+
+  /* reel filter */
+  const filters = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const visible = () => data.reels.filter((r) => (document.querySelector<HTMLElement>(`[data-open="${r.id}"]`)!.closest('li') as HTMLElement).hidden === false);
+  filters.forEach((b) => b.addEventListener('click', () => {
+    filters.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    document.querySelectorAll<HTMLElement>('#reels li').forEach((li) => (li.hidden = b.dataset.filter !== 'all' && li.dataset.mood !== b.dataset.filter));
+  }));
+
+  /* hover preview on devices with a mouse */
+  if (matchMedia('(hover: hover)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll<HTMLElement>('[data-open]').forEach((card) => {
+      const v = card.querySelector('video')!;
+      card.addEventListener('pointerenter', () => { v.preload = 'auto'; v.play().catch(() => {}); });
+      card.addEventListener('pointerleave', () => { v.pause(); });
+    });
+  }
+
+  /* player */
+  const dlg = document.getElementById('player') as HTMLDialogElement;
+  const video = document.getElementById('player-video') as HTMLVideoElement;
+  let list: R[] = data.reels; let at = 0;
+  function show(i: number) {
+    at = (i + list.length) % list.length;
+    const r = list[at];
+    video.src = src(r); video.poster = `${base}media/${r.file}.jpg`;
+    document.getElementById('player-title')!.textContent = r.title;
+    document.getElementById('player-line')!.textContent = r.line;
+    history.replaceState(null, '', `#reel=${r.id}`);
+    video.play().catch(() => {});
+  }
+  function open(id: string, from: R[] = visible()) {
+    list = from.length ? from : data.reels;
+    const i = list.findIndex((r) => r.id === id);
+    if (i < 0) { list = data.reels; }
+    dlg.showModal(); show(Math.max(0, list.findIndex((r) => r.id === id)));
+  }
+  document.querySelectorAll<HTMLElement>('[data-open]').forEach((b) => b.addEventListener('click', () => { b.querySelector('video')!.pause(); open(b.dataset.open!); }));
+  dlg.querySelectorAll<HTMLElement>('[data-step]').forEach((b) => b.addEventListener('click', () => show(at + Number(b.dataset.step))));
+  document.getElementById('player-close')!.addEventListener('click', () => dlg.close());
+  dlg.addEventListener('close', () => { video.pause(); video.removeAttribute('src'); video.load(); history.replaceState(null, '', location.pathname + location.search); });
+  dlg.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') show(at + 1); if (e.key === 'ArrowLeft') show(at - 1); });
+  let x0 = 0;
+  dlg.addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
+  dlg.addEventListener('touchend', (e) => { const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 60) show(at + (dx < 0 ? 1 : -1)); });
+  const toast = (el: HTMLElement) => { el.hidden = false; setTimeout(() => (el.hidden = true), 1600); };
+  document.getElementById('player-share')!.addEventListener('click', async () => {
+    const link = location.href;
+    if (navigator.share) { navigator.share({ title: `Echomood · ${list[at].title}`, url: link }).catch(() => {}); return; }
+    try { await navigator.clipboard.writeText(link); toast(document.getElementById('player-toast')!); } catch { /* ignore */ }
+  });
+  const deep = location.hash.match(/^#reel=([\w-]+)/);
+  if (deep) open(deep[1], data.reels);
+
+  /* mood picker */
+  const out = document.getElementById('feel-out')!;
+  let mood = ''; let pick: R | undefined;
+  const any = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+  function feel() {
+    const qs = data.quotes.filter((q) => q.mood === mood);
+    const q = any(qs);
+    document.getElementById('feel-quote')!.textContent = q.si;
+    const en = document.getElementById('feel-en'); if (en) en.textContent = q.en;
+    const rs = data.reels.filter((r) => r.mood === mood);
+    pick = any(rs.length ? rs : data.reels.filter((r) => r.mood !== 'sad')); // hope: an uplifting reel
+    out.hidden = false;
+  }
+  document.querySelectorAll<HTMLButtonElement>('[data-feel]').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-feel]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    mood = b.dataset.feel!; feel();
+  }));
+  document.getElementById('feel-again')!.addEventListener('click', feel);
+  document.getElementById('feel-watch')!.addEventListener('click', () => pick && open(pick.id, data.reels));
+
+  /* copy a reflection */
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(b.dataset.copy!); const t0 = b.textContent; b.textContent = b.dataset.done!; setTimeout(() => (b.textContent = t0), 1500); } catch { /* ignore */ }
+  }));
+</script>

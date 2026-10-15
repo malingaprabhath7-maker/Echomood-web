@@ -1,0 +1,59 @@
+---
+import '../styles/global.css';
+import { t, url, page, FACEBOOK, type Lang } from '../data/content';
+interface Props { lang: Lang; title?: string; path?: string }
+const { lang, title, path = '' } = Astro.props;
+const u = t(lang);
+const other: Lang = lang === 'en' ? 'si' : 'en';
+const full = title ? `${title} · Echomood` : 'Echomood — Sound & Feeling';
+const nav = [['reels', '#reels'], ['reflections', '#reflections'], ['wallpaper', 'wallpaper/'], ['about', '#about']] as const;
+const href = (p: string) => (p.startsWith('#') ? page(lang) + p : page(lang, p));
+---
+<!doctype html>
+<html lang={lang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{full}</title>
+  <meta name="description" content={u.desc} />
+  <meta property="og:title" content={full} />
+  <meta property="og:description" content={u.desc} />
+  <meta property="og:image" content={new URL(url('og.jpg'), Astro.site).href} />
+  <meta name="theme-color" content="#0b0a1f" />
+  <link rel="icon" href={url('favicon.png')} type="image/png" />
+  <link rel="apple-touch-icon" href={url('icon-192.png')} />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="min-h-dvh font-sans antialiased">
+  <header class="absolute inset-x-0 top-0 z-30">
+    <div class="mx-auto flex max-w-6xl items-center gap-3 px-5 py-4">
+      <a href={page(lang)} class="flex items-center gap-2.5 text-lg font-semibold tracking-wide">
+        <img src={url('img/logo.webp')} alt="" class="size-10 rounded-full ring-1 ring-neon/50" />Echomood
+      </a>
+      <nav class="ml-auto hidden gap-1 text-sm md:flex" aria-label="Main">
+        {nav.map(([k, p]) => <a href={href(p)} aria-current={path === p ? 'page' : undefined} class="rounded-full px-3.5 py-2 hover:bg-white/10 aria-[current=page]:bg-white/10">{u.nav[k]}</a>)}
+      </nav>
+      <a href={page(other, path.startsWith('#') ? '' : path)} lang={other} class="btn-ghost ml-auto rounded-full px-3.5 py-2 text-sm md:ml-2">{u.other}</a>
+      <a href={FACEBOOK} target="_blank" rel="noopener" class="grid size-10 place-items-center rounded-full bg-[#1877f2] text-white" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" class="size-5" fill="currentColor" aria-hidden="true"><path d="M14 8.5V6.8c0-.8.5-1 .9-1H17V2.1L14 2c-3.3 0-4 2.4-4 4v2.5H7.5V12H10v10h4V12h2.8l.4-3.5z"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <main><slot /></main>
+
+  <footer class="mt-24 border-t border-line">
+    <div class="pulse-line"></div>
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-5 py-8 text-sm text-muted">
+      <p>{u.footer}</p>
+      <nav class="flex gap-4 md:ml-auto">
+        <a class="hover:text-ink" href={FACEBOOK} target="_blank" rel="noopener">Facebook</a>
+        <a class="hover:text-ink" href="https://malingaprabhath7-maker.github.io/malinga-portfolio/">Portfolio</a>
+        <a class="hover:text-ink" href="https://github.com/malingaprabhath7-maker/Echomood-web">Source</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
