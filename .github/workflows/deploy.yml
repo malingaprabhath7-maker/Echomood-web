@@ -26,7 +26,9 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Build
-        run: npm run build
+        run: |
+          npm run build > build.log 2>&1 || { tail -40 build.log | grep -v '^\s*$' | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
+          cat build.log
 
       - name: Publish to the gh-pages branch
         run: |
